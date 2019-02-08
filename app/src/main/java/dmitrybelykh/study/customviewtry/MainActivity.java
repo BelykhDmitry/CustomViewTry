@@ -17,6 +17,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
 
@@ -120,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
                 data = generateSinus();
+                ((RadioButton)findViewById(R.id.radio_sinus)).setChecked(true);
                 break;
         }
         graph.animate().cancel();

@@ -55,7 +55,6 @@
             android:id="@+id/radio_sinus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
             android:text="@string/sin_radiobtn" />
 
         <androidx.appcompat.widget.AppCompatRadioButton
