@@ -148,4 +148,12 @@ public class MainActivity extends AppCompatActivity {
             graph.setGraphColor(getResources().getColor(R.color.graphColor));
         }
     }
+
+    public void interpolatorSwitch(View view) {
+        if(((Switch)view).isChecked()) {
+            graph.setInterpolationOn(true);
+        } else {
+            graph.setInterpolationOn(false);
+        }
+    }
 }

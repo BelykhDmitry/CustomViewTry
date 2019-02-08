@@ -5,4 +5,5 @@
     <string name="cos_radiobtn">Cos</string>
     <string name="giper_radiobtn">1/x</string>
     <string name="switch_text">Dark/Light</string>
+    <string name="interpolator_switch">Interpolator Off/On</string>
 </resources>

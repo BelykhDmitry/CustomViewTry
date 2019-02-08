@@ -33,6 +33,8 @@ public class LinearGraph extends View {
     private float minX;
     private float maxdX;
 
+    private boolean isInterpolationOn = false;
+
     private Path path;
 
     public LinearGraph(Context context, @Nullable AttributeSet attrs) {
@@ -91,6 +93,11 @@ public class LinearGraph extends View {
         invalidate();
     }
 
+    public void setInterpolationOn(boolean isInterpolationOn) {
+        this.isInterpolationOn = isInterpolationOn;
+        invalidate();
+    }
+
     private void setupPaint(int color) {
         paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
@@ -127,14 +134,36 @@ public class LinearGraph extends View {
         // TODO: Axis
         //canvas.drawLine(getPaddingLeft(), getPaddingTop(), getPaddingLeft(), getHeight() - getPaddingBottom(), axisPaint);
         //canvas.drawLine(getPaddingLeft(), getHeight() / 2f, getWidth() - getPaddingRight(), getHeight() / 2f, axisPaint);
-        if (mXList.size() > 0 && mYList.size() > 0) {
-            path.moveTo(getXPos(mXList.get(0), minX, maxdX, width),
-                    getYPos(mYList.get(0), minY, maxdY, high));
-            for (int i = 1; i < mXList.size(); i++) {
-                path.lineTo(getXPos(mXList.get(i), minX, maxdX, width),
-                        getYPos(mYList.get(i), minY, maxdY, high));
+        if (isInterpolationOn) {
+            if (mXList.size() > 0 && mYList.size() > 0) {
+                float prevX = getXPos(mXList.get(0), minX, maxdX, width);
+                float prevY = getYPos(mYList.get(0), minY, maxdY, high);
+                path.moveTo(prevX, prevY);
+                float actualX = getXPos(mXList.get(1), minX, maxdX, width);
+                float actualY = getYPos(mYList.get(1), minY, maxdY, high);
+                float nextX;
+                float nextY;
+                for (int i = 1; i < mXList.size()-1; i++) {
+                    nextX = getXPos(mXList.get(i+1), minX, maxdX, width);
+                    nextY = getYPos(mYList.get(i+1), minY, maxdY, high);
+                    path.cubicTo(prevX, prevY, actualX, actualY, nextX, nextY);
+                    prevX = actualX;
+                    prevY = actualY;
+                    actualX = nextX;
+                    actualY = nextY;
+                }
+                canvas.drawPath(path, paint);
             }
-            canvas.drawPath(path, paint);
+        } else {
+            if (mXList.size() > 0 && mYList.size() > 0) {
+                path.moveTo(getXPos(mXList.get(0), minX, maxdX, width),
+                        getYPos(mYList.get(0), minY, maxdY, high));
+                for (int i = 1; i < mXList.size(); i++) {
+                    path.lineTo(getXPos(mXList.get(i), minX, maxdX, width),
+                            getYPos(mYList.get(i), minY, maxdY, high));
+                }
+                canvas.drawPath(path, paint);
+            }
         }
     }
 }
