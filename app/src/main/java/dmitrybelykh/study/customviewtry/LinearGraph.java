@@ -88,10 +88,11 @@ public class LinearGraph extends View {
     private void setupPaint(int color) {
         paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
+        int shadowColor = Color.argb(Color.alpha(color)/2, Color.red(color), Color.green(color), Color.blue(color));
         paint.setColor(color);
         paint.setStrokeWidth(6f);
         paint.setAntiAlias(true);
-        paint.setShadowLayer(8, 4, 4, 0x80000000);
+        paint.setShadowLayer(8, 4, 4, shadowColor);
 
         axisPaint = new Paint();
         axisPaint.setStyle(Paint.Style.STROKE);

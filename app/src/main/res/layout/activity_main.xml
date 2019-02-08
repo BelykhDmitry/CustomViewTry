@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="32dp"
-            app:piv_color="@color/colorAccent"
+            app:piv_color="@color/graphColor"
             app:piv_integer="5" />
     </androidx.cardview.widget.CardView>
 
