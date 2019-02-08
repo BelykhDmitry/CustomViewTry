@@ -1,23 +1,32 @@
 package dmitrybelykh.study.customviewtry;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.cardview.widget.CardView;
+import androidx.core.view.ViewCompat;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private LinearGraph graph;
+    private RadioGroup radioGroup;
+    private AppCompatButton button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +34,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         graph = findViewById(R.id.graph);
+        radioGroup = findViewById(R.id.radio_group);
+        button = findViewById(R.id.appCompatButton);
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                button.animate().setInterpolator(new AnticipateOvershootInterpolator())
+                        .setDuration(150)
+                        .rotationBy(30f)
+                        .withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                button.animate()
+                                        .setDuration(300)
+                                        .rotationBy(-60f)
+                                        .withEndAction(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                button.animate().setDuration(150)
+                                                        .rotationBy(30f);
+                                            }
+                                        });
+                            }
+                        });
+            }
+        });
     }
 
     @Override
@@ -99,5 +134,16 @@ public class MainActivity extends AppCompatActivity {
                                 .alpha(1f);
                     }
                 });
+    }
+
+    public void changeColors(View view) {
+        if(((Switch)view).isChecked()) {
+            findViewById(R.id.card_view).setBackground(null);
+            graph.setGraphColor(getResources().getColor(R.color.colorPrimaryDark));
+            findViewById(R.id.card_view).invalidate();
+        } else {
+            findViewById(R.id.card_view).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            graph.setGraphColor(getResources().getColor(R.color.graphColor));
+        }
     }
 }

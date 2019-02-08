@@ -85,6 +85,12 @@ public class LinearGraph extends View {
         return minValue;
     }
 
+    public void setGraphColor(int color) {
+        this.mColor = color;
+        setupPaint(mColor);
+        invalidate();
+    }
+
     private void setupPaint(int color) {
         paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
@@ -94,12 +100,12 @@ public class LinearGraph extends View {
         paint.setAntiAlias(true);
         paint.setShadowLayer(8, 4, 4, shadowColor);
 
-        axisPaint = new Paint();
-        axisPaint.setStyle(Paint.Style.STROKE);
-        axisPaint.setColor(Color.DKGRAY);
-        axisPaint.setStrokeWidth(4f);
-        axisPaint.setAntiAlias(true);
-        axisPaint.setShadowLayer(8, 4, 4, Color.LTGRAY);
+//        axisPaint = new Paint();
+//        axisPaint.setStyle(Paint.Style.STROKE);
+//        axisPaint.setColor(Color.DKGRAY);
+//        axisPaint.setStrokeWidth(4f);
+//        axisPaint.setAntiAlias(true);
+//        axisPaint.setShadowLayer(8, 4, 4, Color.LTGRAY);
     }
 
     @Override

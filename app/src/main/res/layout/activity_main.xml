@@ -7,12 +7,13 @@
     tools:context=".MainActivity">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/card_view"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:elevation="100dp"
-        android:theme="@style/CardView"
+        style="@style/Widget.MaterialComponents.CardView"
+        android:backgroundTint="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -29,14 +30,15 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/appCompatButton"
+        style="@style/Widget.MaterialComponents.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
+        android:elevation="50dp"
         android:onClick="makeOtherGraph"
         android:text="@string/button_text"
         android:textSize="14dp"
-        android:elevation="50dp"
-        style="@style/Widget.MaterialComponents.Button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/radio_group"
         app:layout_constraintRight_toLeftOf="@id/radio_group" />
@@ -54,19 +56,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Sin" />
+            android:text="@string/sin_radiobtn" />
 
         <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/radio_cosinus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cos" />
+            android:text="@string/cos_radiobtn" />
 
         <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/radio_giperbola"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1/x" />
+            android:text="@string/giper_radiobtn" />
     </RadioGroup>
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:text="@string/switch_text"
+        android:onClick="changeColors"
+        style="@style/Base.TextAppearance.AppCompat.Widget.Switch"
+        app:layout_constraintEnd_toStartOf="@+id/radio_group"
+        app:layout_constraintTop_toTopOf="@+id/radio_group" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
