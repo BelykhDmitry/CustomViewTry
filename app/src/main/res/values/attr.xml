@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="LinearGraph">
+        <attr name="piv_color" format="color"/>
+        <attr name="piv_integer" format="integer"/>
+    </declare-styleable>
+</resources>
