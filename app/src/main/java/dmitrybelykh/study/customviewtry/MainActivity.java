@@ -71,11 +71,19 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Pair<Float, Float>> generateData() {
         ArrayList<Pair<Float, Float>> list = new ArrayList<>();
-        float value = 5f;
-        for (int i = 0; i < 10; i++) {
-            value *= -1;
-            list.add(Pair.create(new Float(i), value));
-        }
+        list.add(Pair.create(1f, 1f));
+        list.add(Pair.create(3f, 3f));
+        list.add(Pair.create(5f, 5f));
+        list.add(Pair.create(7f, 4f));
+        list.add(Pair.create(10f, 7f));
+        list.add(Pair.create(12f, 1f));
+        list.add(Pair.create(14f, 5f));
+        list.add(Pair.create(15f, 4f));
+//        float value = 5f;
+//        for (int i = 0; i < 10; i++) {
+//            value *= -1;
+//            list.add(Pair.create(new Float(i), value));
+//        }
         return list;
     }
 
