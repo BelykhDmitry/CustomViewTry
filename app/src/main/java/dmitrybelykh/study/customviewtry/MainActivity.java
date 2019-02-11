@@ -1,27 +1,19 @@
 package dmitrybelykh.study.customviewtry;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.cardview.widget.CardView;
-import androidx.core.view.ViewCompat;
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AnticipateOvershootInterpolator;
-import android.view.animation.LinearInterpolator;
-import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
 
 import java.util.ArrayList;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,24 +33,7 @@ public class MainActivity extends AppCompatActivity {
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                button.animate().setInterpolator(new AnticipateOvershootInterpolator())
-                        .setDuration(150)
-                        .rotationBy(30f)
-                        .withEndAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                button.animate()
-                                        .setDuration(300)
-                                        .rotationBy(-60f)
-                                        .withEndAction(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                button.animate().setDuration(150)
-                                                        .rotationBy(30f);
-                                            }
-                                        });
-                            }
-                        });
+                makeOtherGraph(checkedId);
             }
         });
     }
@@ -79,19 +54,14 @@ public class MainActivity extends AppCompatActivity {
         list.add(Pair.create(12f, 1f));
         list.add(Pair.create(14f, 5f));
         list.add(Pair.create(15f, 4f));
-//        float value = 5f;
-//        for (int i = 0; i < 10; i++) {
-//            value *= -1;
-//            list.add(Pair.create(new Float(i), value));
-//        }
         return list;
     }
 
     private ArrayList<Pair<Float, Float>> generateSinus() {
         ArrayList<Pair<Float, Float>> data = new ArrayList<>();
         for (int i = 0; i < 360; i++) {
-            float x = (float)((double)i * 10. *  (Math.PI) / 180.);
-            data.add(Pair.create(x, (float)Math.sin(x)));
+            float x = (float) ((double) i * 10. * (Math.PI) / 180.);
+            data.add(Pair.create(x, (float) Math.sin(x)));
         }
         return data;
     }
@@ -99,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Pair<Float, Float>> generateCosinus() {
         ArrayList<Pair<Float, Float>> data = new ArrayList<>();
         for (int i = 0; i < 360; i++) {
-            float x = (float)((double)i * 10. *  (Math.PI) / 180.);
-            data.add(Pair.create(x, (float)Math.cos(x)));
+            float x = (float) ((double) i * 10. * (Math.PI) / 180.);
+            data.add(Pair.create(x, (float) Math.cos(x)));
         }
         return data;
     }
@@ -114,10 +84,9 @@ public class MainActivity extends AppCompatActivity {
         return data;
     }
 
-    public void makeOtherGraph(View view) {
+    public void makeOtherGraph(int checkedId) {
         final ArrayList<Pair<Float, Float>> data;
-        RadioGroup rg = findViewById(R.id.radio_group);
-        switch (rg.getCheckedRadioButtonId()) {
+        switch (checkedId) {
             case R.id.radio_sinus:
                 data = generateSinus();
                 break;
@@ -129,9 +98,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
                 data = generateSinus();
-                ((RadioButton)findViewById(R.id.radio_sinus)).setChecked(true);
+                ((RadioButton) findViewById(R.id.radio_sinus)).setChecked(true);
                 break;
         }
+        animateGraph(data);
+    }
+
+    private void animateGraph(final ArrayList<Pair<Float, Float>> data) {
         graph.animate().cancel();
         graph.animate().setDuration(500)
                 .alpha(0f)
@@ -147,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeColors(View view) {
-        if(((Switch)view).isChecked()) {
+        if (((Switch) view).isChecked()) {
             findViewById(R.id.card_view).setBackground(null);
             graph.setGraphColor(getResources().getColor(R.color.colorPrimaryDark));
             findViewById(R.id.card_view).invalidate();
@@ -158,10 +131,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void interpolatorSwitch(View view) {
-        if(((Switch)view).isChecked()) {
+        if (((Switch) view).isChecked()) {
             graph.setInterpolationOn(true);
         } else {
             graph.setInterpolationOn(false);
+        }
+    }
+
+    public void restoreToDefault(View view) {
+        final ArrayList<Pair<Float, Float>> data = generateData();
+        animateGraph(data);
+        if (radioGroup != null) {
+            ((RadioButton) findViewById(radioGroup.getCheckedRadioButtonId())).setChecked(false);
         }
     }
 }
