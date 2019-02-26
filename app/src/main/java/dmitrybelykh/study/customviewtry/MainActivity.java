@@ -1,11 +1,8 @@
 package dmitrybelykh.study.customviewtry;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
@@ -47,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Pair<Float, Float>> generateData() {
         ArrayList<Pair<Float, Float>> list = new ArrayList<>();
         list.add(Pair.create(1f, 1f));
-        list.add(Pair.create(3f, 3f));
+        list.add(Pair.create(3f, 4f));
         list.add(Pair.create(5f, 5f));
         list.add(Pair.create(7f, 4f));
         list.add(Pair.create(10f, 7f));
@@ -105,19 +102,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void animateGraph(final ArrayList<Pair<Float, Float>> data) {
-        graph.animate().cancel();
-        graph.animate().setDuration(500)
-                .alpha(0f)
-                .setInterpolator(new AccelerateInterpolator())
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        graph.setData(data);
-                        graph.animate().setDuration(1000)
-                                .setListener(null)
-                                .alpha(1f);
-                    }
-                });
+        graph.setData(data);
+
     }
 
     public void changeColors(View view) {

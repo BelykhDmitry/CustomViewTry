@@ -43,11 +43,13 @@ public class LinearGraph extends View {
     }
 
     public void setData(ArrayList<Pair<Float, Float>> dataList) {
-        hideWithAnimation();
-        dataHelper.setData(dataList);
-        Log.d(LOG_TAG, "onSetData");
-        invalidate();
-        showWithAnimation();
+        final LinearGraph self = this;
+        AnimationHelper.hideWithAnimation(this, () -> {
+            dataHelper.setData(dataList);
+            Log.d(LOG_TAG, "onSetData");
+            postInvalidate();
+            AnimationHelper.showWithAnimation(self, null);
+        });
     }
 
     public void setGraphColor(int color) {
@@ -97,20 +99,6 @@ public class LinearGraph extends View {
         Log.d(LOG_TAG, "onDraw");
         dataHelper.fillPath(path);
         canvas.drawPath(path, paint);
-    }
-
-    private void hideWithAnimation() {
-        this.animate().cancel();
-        this.animate().setDuration(250)
-                .alpha(0f)
-                .setInterpolator(new AccelerateInterpolator());
-    }
-
-    private void showWithAnimation() {
-        this.animate().cancel();
-        this.animate().setDuration(250)
-                .alpha(1f)
-                .setInterpolator(new AccelerateInterpolator());
     }
 
     /**
