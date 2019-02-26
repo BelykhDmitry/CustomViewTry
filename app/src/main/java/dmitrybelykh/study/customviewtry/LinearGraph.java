@@ -43,11 +43,11 @@ public class LinearGraph extends View {
     }
 
     public void setData(ArrayList<Pair<Float, Float>> dataList) {
-        animate().cancel();
         hideWithAnimation();
         dataHelper.setData(dataList);
         Log.d(LOG_TAG, "onSetData");
         invalidate();
+        showWithAnimation();
     }
 
     public void setGraphColor(int color) {
@@ -100,23 +100,21 @@ public class LinearGraph extends View {
     }
 
     private void hideWithAnimation() {
-        animate().cancel();
-        animate().setDuration(500)
+        this.animate().cancel();
+        this.animate().setDuration(250)
                 .alpha(0f)
                 .setInterpolator(new AccelerateInterpolator());
     }
 
     private void showWithAnimation() {
-        animate().cancel();
-        animate().setDuration(500)
+        this.animate().cancel();
+        this.animate().setDuration(250)
                 .alpha(1f)
                 .setInterpolator(new AccelerateInterpolator());
     }
 
     /**
-     * По хорошему должен выполять следующие действия:
-     * Пересчёт данных для отрисовки и их хранение.
-     * Построение доп точек для интерполяции?
+     * Class-helper for calculate all data
      */
     private class DataHelper {
         // View Size Params
@@ -330,14 +328,10 @@ public class LinearGraph extends View {
 
         private void interpolatePath(Path path) {
             path.moveTo(mXCoordinatesList.getFirst(), mYCoordinatesList.getFirst());
-            ListIterator<Float> iterX = mXCoordinatesList.listIterator(1);
-            ListIterator<Float> iterY = mYCoordinatesList.listIterator(1);
-            Iterator<Float> iterInterpolateX = interpolationXCoord.iterator();
-            Iterator<Float> iterInterpolateY = interpolationYCoord.iterator();
-            while (iterInterpolateX.hasNext() && iterInterpolateY.hasNext()) {
-                path.cubicTo(iterX.previous(), iterY.previous(),
-                        iterInterpolateX.next(), iterInterpolateY.next(),
-                        iterX.next(), iterY.next());
+            for (int i = 0; i < mXCoordinatesList.size() - 1; i++) {
+                path.cubicTo(mXCoordinatesList.get(i), mYCoordinatesList.get(i),
+                        interpolationXCoord.get(i), interpolationYCoord.get(i),
+                        mXCoordinatesList.get(i+1), mYCoordinatesList.get(i+1));
             }
         }
 
