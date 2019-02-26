@@ -87,10 +87,9 @@ public class LinearGraph extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         Log.d(LOG_TAG, "onSizeChanged");
         super.onSizeChanged(w, h, oldw, oldh);
-        dataHelper.setViewSize(w, h)
-                .setPaddings(getPaddingLeft(), getPaddingRight(),
-                        getPaddingTop(), getPaddingBottom());
-        // пересчёт можно сделать здесь
+        dataHelper.setPaddings(getPaddingLeft(), getPaddingRight(),
+                getPaddingTop(), getPaddingBottom())
+                .setViewSize(w, h);
     }
 
     @Override
@@ -164,8 +163,8 @@ public class LinearGraph extends View {
          * @return self
          */
         DataHelper setViewSize(int width, int high) {
-            mHigh = high;
-            mWidth = width;
+            mHigh = high - (mPaddingTop + mPaddingBottom);
+            mWidth = width - (mPaddingLeft + mPaddingRight);
             return this;
         }
 
@@ -278,7 +277,7 @@ public class LinearGraph extends View {
          * @return X coordinate given by the scale
          */
         private float getXPos(float number) {
-            return mPaddingTop + (number - mMinimumX) * (mHigh / mMaximumDeltaX);
+            return mPaddingLeft + (number - mMinimumX) * (mWidth / mMaximumDeltaX);
         }
 
         /**
