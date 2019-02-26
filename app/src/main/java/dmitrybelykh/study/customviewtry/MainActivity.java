@@ -113,7 +113,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         graph.setData(data);
+                        graph.animate().setListener(null);
                         graph.animate().setDuration(1000)
+                                .setInterpolator(new AccelerateInterpolator())
                                 .alpha(1f);
                     }
                 });

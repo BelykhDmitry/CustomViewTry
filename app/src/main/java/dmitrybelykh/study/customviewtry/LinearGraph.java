@@ -18,7 +18,6 @@ public class LinearGraph extends View {
 
     private int mColor;
     private Paint paint;
-    private Paint axisPaint;
     private ArrayList<Float> mXList;
     private ArrayList<Float> mYList;
     private float minY;
@@ -99,18 +98,6 @@ public class LinearGraph extends View {
         paint.setStrokeWidth(6f);
         paint.setAntiAlias(true);
         paint.setShadowLayer(8, 4, 4, shadowColor);
-
-//        axisPaint = new Paint();
-//        axisPaint.setStyle(Paint.Style.STROKE);
-//        axisPaint.setColor(Color.DKGRAY);
-//        axisPaint.setStrokeWidth(4f);
-//        axisPaint.setAntiAlias(true);
-//        axisPaint.setShadowLayer(8, 4, 4, Color.LTGRAY);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
     }
 
     @Override
@@ -124,9 +111,6 @@ public class LinearGraph extends View {
         float high = getHeight() - getPaddingTop() - getPaddingBottom();
         float width = getWidth() - getPaddingLeft() - getPaddingRight();
         path.reset();
-        // TODO: Axis
-        //canvas.drawLine(getPaddingLeft(), getPaddingTop(), getPaddingLeft(), getHeight() - getPaddingBottom(), axisPaint);
-        //canvas.drawLine(getPaddingLeft(), getHeight() / 2f, getWidth() - getPaddingRight(), getHeight() / 2f, axisPaint);
         if (isInterpolationOn) {
             if (mXList.size() > 2 && mYList.size() > 2) {
                 interpolate2();
