@@ -6,4 +6,5 @@
     <string name="giper_radiobtn">1/x</string>
     <string name="switch_text">Dark/Light</string>
     <string name="interpolator_switch">Interpolator Off/On</string>
+    <string name="default_radio_btn">Default</string>
 </resources>

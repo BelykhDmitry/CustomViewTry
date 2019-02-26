@@ -16,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
 
     private LinearGraph graph;
     private RadioGroup radioGroup;
-    private AppCompatButton button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
 
         graph = findViewById(R.id.graph);
         radioGroup = findViewById(R.id.radio_group);
-        button = findViewById(R.id.appCompatButton);
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -38,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        graph.setData(generateData());
     }
 
     private ArrayList<Pair<Float, Float>> generateData() {
@@ -94,16 +91,10 @@ public class MainActivity extends AppCompatActivity {
                 data = generateGiperbola();
                 break;
             default:
-                data = generateSinus();
-                ((RadioButton) findViewById(R.id.radio_sinus)).setChecked(true);
+                data = generateData();
                 break;
         }
-        animateGraph(data);
-    }
-
-    private void animateGraph(final ArrayList<Pair<Float, Float>> data) {
         graph.setData(data);
-
     }
 
     public void changeColors(View view) {
@@ -122,14 +113,6 @@ public class MainActivity extends AppCompatActivity {
             graph.setInterpolationOn(true);
         } else {
             graph.setInterpolationOn(false);
-        }
-    }
-
-    public void restoreToDefault(View view) {
-        final ArrayList<Pair<Float, Float>> data = generateData();
-        animateGraph(data);
-        if (radioGroup != null) {
-            //((RadioButton) findViewById(radioGroup.getCheckedRadioButtonId())).setChecked(false);
         }
     }
 }
