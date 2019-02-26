@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onAnimationEnd(Animator animation) {
                         graph.setData(data);
                         graph.animate().setDuration(1000)
+                                .setListener(null)
                                 .alpha(1f);
                     }
                 });

@@ -12,7 +12,9 @@ import android.util.Pair;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -25,18 +27,7 @@ public class LinearGraph extends View {
 
     private int mColor;
     private Paint paint;
-    private Paint axisPaint;
     private DataHelper dataHelper;
-
-    // Перенос в DrawHelper?
-    private ArrayList<Float> mXList;
-    private ArrayList<Float> mYList;
-    private float minY;
-    private float maxdY;
-    private float minX;
-    private float maxdX;
-
-    private boolean isInterpolationOn = false;
 
     private Path path;
 
@@ -52,26 +43,11 @@ public class LinearGraph extends View {
     }
 
     public void setData(ArrayList<Pair<Float, Float>> dataList) {
-        final ArrayList<Pair<Float, Float>> localDataList = dataList;
         animate().cancel();
         hideWithAnimation();
-        dataHelper.setData(localDataList);
+        dataHelper.setData(dataList);
         Log.d(LOG_TAG, "onSetData");
         invalidate();
-    }
-
-    private void hideWithAnimation() {
-        animate().cancel();
-        animate().setDuration(500)
-                .alpha(0f)
-                .setInterpolator(new AccelerateInterpolator());
-    }
-
-    private void showWithAnimation() {
-        animate().cancel();
-        animate().setDuration(500)
-                .alpha(1f)
-                .setInterpolator(new AccelerateInterpolator());
     }
 
     public void setGraphColor(int color) {
@@ -111,33 +87,31 @@ public class LinearGraph extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         Log.d(LOG_TAG, "onSizeChanged");
         super.onSizeChanged(w, h, oldw, oldh);
-
+        dataHelper.setViewSize(w, h)
+                .setPaddings(getPaddingLeft(), getPaddingRight(),
+                        getPaddingTop(), getPaddingBottom());
         // пересчёт можно сделать здесь
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         Log.d(LOG_TAG, "onDraw");
-//        float high = getHeight() - getPaddingTop() - getPaddingBottom();
-//        float width = getWidth() - getPaddingLeft() - getPaddingRight();
-        path.reset();
+        dataHelper.fillPath(path);
+        canvas.drawPath(path, paint);
+    }
 
-//        if (isInterpolationOn) {
-//            if (mXList.size() > 2 && mYList.size() > 2) {
-//                interpolate2();
-//                canvas.drawPath(path, paint);
-//            }
-//        } else {
-//            if (mXList.size() > 0 && mYList.size() > 0) {
-//                path.moveTo(getXPos(mXList.get(0), minX, maxdX, width),
-//                        getYPos(mYList.get(0), minY, maxdY, high));
-//                for (int i = 1; i < mXList.size(); i++) {
-//                    path.lineTo(getXPos(mXList.get(i), minX, maxdX, width),
-//                            getYPos(mYList.get(i), minY, maxdY, high));
-//                }
-//                canvas.drawPath(path, paint);
-//            }
-//        }
+    private void hideWithAnimation() {
+        animate().cancel();
+        animate().setDuration(500)
+                .alpha(0f)
+                .setInterpolator(new AccelerateInterpolator());
+    }
+
+    private void showWithAnimation() {
+        animate().cancel();
+        animate().setDuration(500)
+                .alpha(1f)
+                .setInterpolator(new AccelerateInterpolator());
     }
 
     /**
@@ -154,10 +128,11 @@ public class LinearGraph extends View {
         private int mPaddingTop = 0;
         private int mPaddingBottom = 0;
         // Data
+        WeakReference<ArrayList<Pair<Float, Float>>> rawDataWeakReference;
         private volatile boolean isValid = false;
         private boolean interpolationOn = false;
-        private LinkedList<Float> mXCoordinatesList;
-        private LinkedList<Float> mYCoordinatesList;
+        private LinkedList<Float> mXCoordinatesList = new LinkedList<>();
+        private LinkedList<Float> mYCoordinatesList = new LinkedList<>();
         // Data params
         private float mMinimumY;
         private float mMaximumDeltaY;
@@ -201,7 +176,9 @@ public class LinearGraph extends View {
          * @return self
          */
         DataHelper setInterpolation(boolean on) {
-            isInterpolationOn = on;
+            interpolationOn = on;
+            if (isValid)
+                interpolate();
             return this;
         }
 
@@ -212,23 +189,31 @@ public class LinearGraph extends View {
          * @return self
          */
         DataHelper setData(ArrayList<Pair<Float, Float>> dataList) {
-            final ArrayList<Pair<Float, Float>> localDataList = new ArrayList<>(dataList);
-            mXCoordinatesList = new LinkedList<>();
-            mYCoordinatesList = new LinkedList<>();
+            rawDataWeakReference = new WeakReference<>(dataList);
+            final ArrayList<Pair<Float, Float>> localDataList = rawDataWeakReference.get();
+            mXCoordinatesList.clear();
+            mYCoordinatesList.clear();
             for (Pair<Float, Float> dot : localDataList) {
                 mXCoordinatesList.add(new Float(dot.first));
                 mYCoordinatesList.add(new Float(dot.second));
             }
             calculateDataParams();
+            isValid = calculatePoints();
+            if (interpolationOn)
+                interpolate();
             return this;
         }
 
         /**
-         * Last method of DataHelper Builder. Calculate points.
+         * Calculate points. Call to calculate scalable data.
          *
          * @return True if data is Valid
          */
         boolean calculatePoints() {
+            for (int i = 0; i < mXCoordinatesList.size(); i++) {
+                mXCoordinatesList.set(i, getXPos(mXCoordinatesList.get(i)));
+                mYCoordinatesList.set(i, getYPos(mYCoordinatesList.get(i)));
+            }
             return true;
         }
 
@@ -239,15 +224,20 @@ public class LinearGraph extends View {
          * @param width new View width.
          * @param heigh new View heigh.
          */
-        void onSizeChanged(int width, int heigh) {
-            float graphHigh = calcGraphSize(mHigh, mPaddingTop, mPaddingBottom);
-            float graphWidth = calcGraphSize(mWidth, mPaddingLeft, mPaddingRight);
-            recalculateData(graphHigh, graphWidth);
-        }
+//        void onSizeChanged(int width, int heigh) {
+//            float graphHigh = calcGraphSize(mHigh, mPaddingTop, mPaddingBottom);
+//            float graphWidth = calcGraphSize(mWidth, mPaddingLeft, mPaddingRight);
+//            recalculateData(graphHigh, graphWidth);
+//        }
 
-        private void recalculateData(float graphHigh, float graphWidth) {
-
-        }
+        /**
+         * Metod when resize View. Coming soon
+         * @param graphHigh
+         * @param graphWidth
+         */
+//        private void recalculateData(float graphHigh, float graphWidth) {
+//
+//        }
 
         /**
          * Calculates minimum X, Y, maximum delta X, Y
@@ -269,10 +259,6 @@ public class LinearGraph extends View {
          */
         private float calcGraphSize(float overallSize, int paddingBegin, int paddingEnd) {
             return overallSize - paddingBegin - paddingEnd;
-        }
-
-        boolean validateData() {
-            return true; // Заглушка
         }
 
         /**
@@ -302,11 +288,7 @@ public class LinearGraph extends View {
          * @return max value
          */
         private float getMax(LinkedList<Float> list) {
-            float maxValue = Float.MIN_VALUE;
-            for (Float coord : list) {
-                maxValue = Math.max(coord, maxValue);
-            }
-            return maxValue;
+            return Collections.max(list);
         }
 
         /**
@@ -316,11 +298,7 @@ public class LinearGraph extends View {
          * @return min value
          */
         private float getMin(LinkedList<Float> list) {
-            float minValue = Float.MAX_VALUE;
-            for (Float coord : list) {
-                minValue = Math.min(coord, minValue);
-            }
-            return minValue;
+            return Collections.min(list);
         }
 
         public void fillPath(Path path) {
@@ -346,6 +324,11 @@ public class LinearGraph extends View {
         private LinkedList<Float> interpolationXCoord = new LinkedList<>();
         private LinkedList<Float> interpolationYCoord = new LinkedList<>();
 
+        private void clearInterpolatePoints() {
+            interpolationXCoord.clear();
+            interpolationYCoord.clear();
+        }
+
         private void interpolatePath(Path path) {
             path.moveTo(mXCoordinatesList.getFirst(), mYCoordinatesList.getFirst());
             ListIterator<Float> iterX = mXCoordinatesList.listIterator(1);
@@ -364,8 +347,7 @@ public class LinearGraph extends View {
          * небольшого количества точек.
          */
         private void interpolate() {
-            interpolationXCoord.clear();
-            interpolationYCoord.clear();
+            clearInterpolatePoints();
             float prevX = mXCoordinatesList.getFirst();
             float prevY = mYCoordinatesList.getFirst();
             float actualX = mXCoordinatesList.get(1);
