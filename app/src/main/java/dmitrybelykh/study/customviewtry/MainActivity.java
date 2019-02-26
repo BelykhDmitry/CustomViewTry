@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<Pair<Float, Float>> data = generateData();
         animateGraph(data);
         if (radioGroup != null) {
-            ((RadioButton) findViewById(radioGroup.getCheckedRadioButtonId())).setChecked(false);
+            //((RadioButton) findViewById(radioGroup.getCheckedRadioButtonId())).setChecked(false);
         }
     }
 }
