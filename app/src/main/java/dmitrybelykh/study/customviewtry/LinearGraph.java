@@ -45,8 +45,8 @@ public class LinearGraph extends View {
     public void setData(ArrayList<Pair<Float, Float>> dataList) {
         final LinearGraph self = this;
         AnimationHelper.hideWithAnimation(this, () -> {
-            dataHelper.setData(dataList);
-            dataHelper.fillPath(path);
+            dataHelper.setData(dataList)
+                    .fillPath(path);
             Log.d(LOG_TAG, "onSetData");
             postInvalidate();
             AnimationHelper.showWithAnimation(self, null);
@@ -62,8 +62,8 @@ public class LinearGraph extends View {
     public void setInterpolationOn(boolean isInterpolationOn) {
         final LinearGraph self = this;
         AnimationHelper.hideWithAnimation(this, () -> {
-            dataHelper.setInterpolation(isInterpolationOn);
-            dataHelper.fillPath(path);
+            dataHelper.setInterpolation(isInterpolationOn)
+                    .fillPath(path);
             Log.d(LOG_TAG, "onSetData");
             postInvalidate();
             AnimationHelper.showWithAnimation(self, null);
@@ -196,39 +196,32 @@ public class LinearGraph extends View {
         }
 
         /**
+         * Fill path with points.
+         * @param path Path to fill
+         */
+        public void fillPath(Path path) {
+            path.reset();
+            if (isValid) {
+                if (interpolationOn) {
+                    interpolatePath(path);
+                } else {
+                    linearPath(path);
+                }
+            }
+        }
+
+        /**
          * Calculate points. Call to calculate scalable data.
          *
          * @return True if data is Valid
          */
-        boolean calculatePoints() {
+        private boolean calculatePoints() {
             for (int i = 0; i < mXCoordinatesList.size(); i++) {
                 mXCoordinatesList.set(i, getXPos(mXCoordinatesList.get(i)));
                 mYCoordinatesList.set(i, getYPos(mYCoordinatesList.get(i)));
             }
             return true;
         }
-
-
-        /**
-         * Call when view resize
-         *
-         * @param width new View width.
-         * @param heigh new View heigh.
-         */
-//        void onSizeChanged(int width, int heigh) {
-//            float graphHigh = calcGraphSize(mHigh, mPaddingTop, mPaddingBottom);
-//            float graphWidth = calcGraphSize(mWidth, mPaddingLeft, mPaddingRight);
-//            recalculateData(graphHigh, graphWidth);
-//        }
-
-        /**
-         * Metod when resize View. Coming soon
-         * @param graphHigh
-         * @param graphWidth
-         */
-//        private void recalculateData(float graphHigh, float graphWidth) {
-//
-//        }
 
         /**
          * Calculates minimum X, Y, maximum delta X, Y
@@ -292,17 +285,11 @@ public class LinearGraph extends View {
             return Collections.min(list);
         }
 
-        public void fillPath(Path path) {
-            path.reset();
-            if (isValid) {
-                if (interpolationOn) {
-                    interpolatePath(path);
-                } else {
-                    linearPath(path);
-                }
-            }
-        }
 
+        /**
+         * Path fill without interpolation.
+         * @param path Path to fill
+         */
         private void linearPath(Path path) {
             path.moveTo(mXCoordinatesList.getFirst(), mYCoordinatesList.getFirst());
             Iterator<Float> iterX = mXCoordinatesList.iterator();
@@ -312,6 +299,9 @@ public class LinearGraph extends View {
             }
         }
 
+        /**
+         * Lists for interpolation help points. Empty if interpolation is off.
+         */
         private LinkedList<Float> interpolationXCoord = new LinkedList<>();
         private LinkedList<Float> interpolationYCoord = new LinkedList<>();
 
@@ -320,6 +310,10 @@ public class LinearGraph extends View {
             interpolationYCoord.clear();
         }
 
+        /**
+         * Path fill with interpolation help-points.
+         * @param path Path to fill
+         */
         private void interpolatePath(Path path) {
             path.moveTo(mXCoordinatesList.getFirst(), mYCoordinatesList.getFirst());
             for (int i = 0; i < mXCoordinatesList.size() - 1; i++) {
