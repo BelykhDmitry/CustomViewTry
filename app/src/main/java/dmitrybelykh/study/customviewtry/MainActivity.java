@@ -26,11 +26,8 @@ public class MainActivity extends AppCompatActivity {
         graph = findViewById(R.id.graph);
         radioGroup = findViewById(R.id.radio_group);
 
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                 makeOtherGraph(checkedId);
-            }
         });
     }
 
