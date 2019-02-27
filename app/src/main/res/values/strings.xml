@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">CustomViewTry</string>
-    <string name="button_text">Other Graph try</string>
+    <string name="button_text">Restore to Defaults</string>
+    <string name="sin_radiobtn">Sin</string>
+    <string name="cos_radiobtn">Cos</string>
+    <string name="giper_radiobtn">1/x</string>
+    <string name="switch_text">Dark/Light</string>
+    <string name="interpolator_switch">Interpolator Off/On</string>
 </resources>
