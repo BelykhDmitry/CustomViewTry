@@ -46,6 +46,7 @@ public class LinearGraph extends View {
         final LinearGraph self = this;
         AnimationHelper.hideWithAnimation(this, () -> {
             dataHelper.setData(dataList);
+            dataHelper.fillPath(path);
             Log.d(LOG_TAG, "onSetData");
             postInvalidate();
             AnimationHelper.showWithAnimation(self, null);
@@ -59,8 +60,14 @@ public class LinearGraph extends View {
     }
 
     public void setInterpolationOn(boolean isInterpolationOn) {
-        dataHelper.setInterpolation(isInterpolationOn);
-        invalidate();
+        final LinearGraph self = this;
+        AnimationHelper.hideWithAnimation(this, () -> {
+            dataHelper.setInterpolation(isInterpolationOn);
+            dataHelper.fillPath(path);
+            Log.d(LOG_TAG, "onSetData");
+            postInvalidate();
+            AnimationHelper.showWithAnimation(self, null);
+        });
     }
 
     private void setupPaint(int color) {
@@ -97,7 +104,6 @@ public class LinearGraph extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         Log.d(LOG_TAG, "onDraw");
-        dataHelper.fillPath(path);
         canvas.drawPath(path, paint);
     }
 

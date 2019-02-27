@@ -1,5 +1,6 @@
 package dmitrybelykh.study.customviewtry;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
