@@ -16,7 +16,14 @@ public class AnimationHelper {
         view.animate().setDuration(250)
                 .setListener(null)
                 .alpha(0f)
-                .withEndAction(endAction)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        endAction.run();
+                        view.animate().setListener(null);
+                    }
+                })
                 .setInterpolator(new AccelerateInterpolator()).start();
     }
 
@@ -30,7 +37,14 @@ public class AnimationHelper {
         view.animate().setDuration(250)
                 .setListener(null)
                 .alpha(1f)
-                .withEndAction(endAction)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        endAction.run();
+                        view.animate().setListener(null);
+                    }
+                })
                 .setInterpolator(new AccelerateInterpolator()).start();
     }
 }
