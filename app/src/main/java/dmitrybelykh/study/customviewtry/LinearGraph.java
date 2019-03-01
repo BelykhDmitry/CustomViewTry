@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -61,6 +62,7 @@ public class LinearGraph extends View {
 
     public void setInterpolationOn(boolean isInterpolationOn) {
         final LinearGraph self = this;
+        dataHelper.interpolationOn = isInterpolationOn;
         AnimationHelper.hideWithAnimation(this, () -> {
             dataHelper.setInterpolation(isInterpolationOn)
                     .fillPath(path);
@@ -68,6 +70,14 @@ public class LinearGraph extends View {
             postInvalidate();
             AnimationHelper.showWithAnimation(self, null);
         });
+    }
+
+    public int gettGraphColor() {
+        return paint.getColor();
+    }
+
+    public boolean getInterpolationOn() {
+        return dataHelper.interpolationOn;
     }
 
     private void setupPaint(int color) {
