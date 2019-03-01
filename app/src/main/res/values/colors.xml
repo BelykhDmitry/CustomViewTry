@@ -4,4 +4,5 @@
     <color name="colorPrimaryDark">#34515e</color>
     <color name="colorAccent">#40C4FF</color>
     <color name="graphColor">#FFAB40</color>
+    <color name="graphBackgroundLigth">#FFFFFF</color>
 </resources>

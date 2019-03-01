@@ -6,77 +6,52 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 import androidx.annotation.Nullable;
 
 public class LinearGraph extends View {
 
+    private static final String LOG_TAG = LinearGraph.class.getName();
+
     private int mColor;
     private Paint paint;
-    private ArrayList<Float> mXList;
-    private ArrayList<Float> mYList;
-    private float minY;
-    private float maxdY;
-    private float minX;
-    private float maxdX;
-
-    private boolean isInterpolationOn = false;
+    private DataHelper dataHelper;
 
     private Path path;
 
     public LinearGraph(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        Log.d(LOG_TAG, "Constructor");
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.LinearGraph);
         mColor = typedArray.getColor(R.styleable.LinearGraph_piv_color, R.color.colorPrimaryDark);
-        int mInt = typedArray.getInt(R.styleable.LinearGraph_piv_integer, -1);
         typedArray.recycle();
         setupPaint(mColor);
         path = new Path();
-        mXList = new ArrayList<>();
-        mYList = new ArrayList<>();
+        dataHelper = new DataHelper();
     }
 
     public void setData(ArrayList<Pair<Float, Float>> dataList) {
-        mXList.clear();
-        mYList.clear();
-        for (Pair<Float, Float> dot : dataList) {
-            mXList.add(new Float(dot.first));
-            mYList.add(new Float(dot.second)); // Как скажется на памяти?
-        }
-        minY = getMin(mYList);
-        maxdY = getMax(mYList) - minY;
-        minX = getMin(mXList);
-        maxdX = getMax(mXList) - minX;
-        invalidate();
-    }
-
-    private float getYPos(float number, float minNumberY, float maxDeltaY, float high) {
-        return high + getPaddingTop() - (number - minNumberY) * (high / maxDeltaY); // inverse + padding
-    }
-
-    private float getXPos(float number, float minNumberX, float maxDeltaX, float high) {
-        return getPaddingTop() + (number - minNumberX) * (high / maxDeltaX);
-    }
-
-    private float getMax(ArrayList<Float> list) {
-        float maxValue = Float.MIN_VALUE;
-        for (Float coord : list) {
-            maxValue = Math.max(coord, maxValue);
-        }
-        return maxValue;
-    }
-
-    private float getMin(ArrayList<Float> list) {
-        float minValue = Float.MAX_VALUE;
-        for (Float coord : list) {
-            minValue = Math.min(coord, minValue);
-        }
-        return minValue;
+        final LinearGraph self = this;
+        AnimationHelper.hideWithAnimation(this, () -> {
+            dataHelper.setData(dataList)
+                    .fillPath(path);
+            Log.d(LOG_TAG, "onSetData");
+            postInvalidate();
+            AnimationHelper.showWithAnimation(self, null);
+        });
     }
 
     public void setGraphColor(int color) {
@@ -86,8 +61,23 @@ public class LinearGraph extends View {
     }
 
     public void setInterpolationOn(boolean isInterpolationOn) {
-        this.isInterpolationOn = isInterpolationOn;
-        invalidate();
+        final LinearGraph self = this;
+        dataHelper.interpolationOn = isInterpolationOn;
+        AnimationHelper.hideWithAnimation(this, () -> {
+            dataHelper.setInterpolation(isInterpolationOn)
+                    .fillPath(path);
+            Log.d(LOG_TAG, "onSetData");
+            postInvalidate();
+            AnimationHelper.showWithAnimation(self, null);
+        });
+    }
+
+    public int gettGraphColor() {
+        return paint.getColor();
+    }
+
+    public boolean getInterpolationOn() {
+        return dataHelper.interpolationOn;
     }
 
     private void setupPaint(int color) {
@@ -101,67 +91,282 @@ public class LinearGraph extends View {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Log.d(LOG_TAG, "onMeasure");
         setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        Log.d(LOG_TAG, "onSizeChanged");
+        super.onSizeChanged(w, h, oldw, oldh);
+        dataHelper.setPaddings(getPaddingLeft(), getPaddingRight(),
+                getPaddingTop(), getPaddingBottom())
+                .setViewSize(w, h);
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
-        float high = getHeight() - getPaddingTop() - getPaddingBottom();
-        float width = getWidth() - getPaddingLeft() - getPaddingRight();
-        path.reset();
-        if (isInterpolationOn) {
-            if (mXList.size() > 2 && mYList.size() > 2) {
-                interpolate2();
-                canvas.drawPath(path, paint);
-            }
-        } else {
-            if (mXList.size() > 0 && mYList.size() > 0) {
-                path.moveTo(getXPos(mXList.get(0), minX, maxdX, width),
-                        getYPos(mYList.get(0), minY, maxdY, high));
-                for (int i = 1; i < mXList.size(); i++) {
-                    path.lineTo(getXPos(mXList.get(i), minX, maxdX, width),
-                            getYPos(mYList.get(i), minY, maxdY, high));
-                }
-                canvas.drawPath(path, paint);
-            }
-        }
+        Log.d(LOG_TAG, "onDraw");
+        canvas.drawPath(path, paint);
     }
 
     /**
-     * Интерполяция кривыми Безье с помощью дополнительных точек. Плохо работает для
-     * небольшого количества точек.
+     * Class-helper for calculate all data
      */
-    private void interpolate2() {
-        float high = getHeight() - getPaddingTop() - getPaddingBottom();
-        float width = getWidth() - getPaddingLeft() - getPaddingRight();
-        float prevX = getXPos(mXList.get(0), minX, maxdX, width);
-        float prevY = getYPos(mYList.get(0), minY, maxdY, high);
-        float actualX = getXPos(mXList.get(1), minX, maxdX, width);
-        float actualY = getYPos(mYList.get(1), minY, maxdY, high);
-        float nextX = getXPos(mXList.get(2), minX, maxdX, width);
-        float nextY = getYPos(mYList.get(2), minY, maxdY, high);
-        float ACx = nextX - prevX;
-        float ACy = nextY - prevY;
-        float module = (float) Math.sqrt(ACx * ACx + ACy * ACy);
-        float tempX = actualX - ACx * (actualX - prevX) / (2f * module);
-        float temptY = actualY - ACy * (actualX - prevX) / (2f * module);
-        path.moveTo(prevX, prevY);
-        path.cubicTo(prevX, prevY, tempX, temptY, actualX, actualY);
-        for (int i = 1; i < mXList.size() - 1; i++) {
-            nextX = getXPos(mXList.get(i + 1), minX, maxdX, width);
-            nextY = getYPos(mYList.get(i + 1), minY, maxdY, high);
-            ACx = nextX - prevX;
-            ACy = nextY - prevY;
-            module = (float) Math.sqrt(ACx * ACx + ACy * ACy);
-            tempX = actualX + ACx * (actualX - prevX) / (2f * module);
-            temptY = actualY + ACy * (actualX - prevX) / (2f * module);
-            path.cubicTo(actualX, actualY, tempX, temptY, nextX, nextY);
-            prevX = actualX;
-            prevY = actualY;
-            actualX = nextX;
-            actualY = nextY;
+    private class DataHelper {
+        // View Size Params
+        private float mHigh = 0f;
+        private float mWidth = 0f;
+        private int mPaddingLeft = 0;
+        private int mPaddingRight = 0;
+        private int mPaddingTop = 0;
+        private int mPaddingBottom = 0;
+        // Data
+        WeakReference<ArrayList<Pair<Float, Float>>> rawDataWeakReference;
+        private volatile boolean isValid = false;
+        private boolean interpolationOn = false;
+        private LinkedList<Float> mXCoordinatesList = new LinkedList<>();
+        private LinkedList<Float> mYCoordinatesList = new LinkedList<>();
+        // Data params
+        private float mMinimumY;
+        private float mMaximumDeltaY;
+        private float mMinimumX;
+        private float mMaximumDeltaX;
+
+        /**
+         * Set view paddings.
+         *
+         * @param left
+         * @param right
+         * @param top
+         * @param bottom
+         * @return self
+         */
+        DataHelper setPaddings(int left, int right, int top, int bottom) {
+            mPaddingLeft = left;
+            mPaddingRight = right;
+            mPaddingTop = top;
+            mPaddingBottom = bottom;
+            return this;
+        }
+
+        /**
+         * Set view size
+         *
+         * @param width
+         * @param high
+         * @return self
+         */
+        DataHelper setViewSize(int width, int high) {
+            mHigh = high - (mPaddingTop + mPaddingBottom);
+            mWidth = width - (mPaddingLeft + mPaddingRight);
+            return this;
+        }
+
+        /**
+         * Set interpolation for graph
+         *
+         * @param on If true sets interpolation On
+         * @return self
+         */
+        DataHelper setInterpolation(boolean on) {
+            interpolationOn = on;
+            if (isValid)
+                interpolate();
+            return this;
+        }
+
+        /**
+         * Sets the graph Data
+         *
+         * @param dataList ArrayList<Pair<Float, Float>>
+         * @return self
+         */
+        DataHelper setData(ArrayList<Pair<Float, Float>> dataList) {
+            rawDataWeakReference = new WeakReference<>(dataList);
+            final ArrayList<Pair<Float, Float>> localDataList = rawDataWeakReference.get();
+            mXCoordinatesList.clear();
+            mYCoordinatesList.clear();
+            for (Pair<Float, Float> dot : localDataList) {
+                mXCoordinatesList.add(new Float(dot.first));
+                mYCoordinatesList.add(new Float(dot.second));
+            }
+            calculateDataParams();
+            isValid = calculatePoints();
+            if (interpolationOn)
+                interpolate();
+            return this;
+        }
+
+        /**
+         * Fill path with points.
+         * @param path Path to fill
+         */
+        public void fillPath(Path path) {
+            path.reset();
+            if (isValid) {
+                if (interpolationOn) {
+                    interpolatePath(path);
+                } else {
+                    linearPath(path);
+                }
+            }
+        }
+
+        /**
+         * Calculate points. Call to calculate scalable data.
+         *
+         * @return True if data is Valid
+         */
+        private boolean calculatePoints() {
+            for (int i = 0; i < mXCoordinatesList.size(); i++) {
+                mXCoordinatesList.set(i, getXPos(mXCoordinatesList.get(i)));
+                mYCoordinatesList.set(i, getYPos(mYCoordinatesList.get(i)));
+            }
+            return true;
+        }
+
+        /**
+         * Calculates minimum X, Y, maximum delta X, Y
+         */
+        private void calculateDataParams() {
+            mMinimumY = getMin(mYCoordinatesList);
+            mMaximumDeltaY = getMax(mYCoordinatesList) - mMinimumY;
+            mMinimumX = getMin(mXCoordinatesList);
+            mMaximumDeltaX = getMax(mXCoordinatesList) - mMinimumX;
+        }
+
+        /**
+         * Calculate Graph size without paddings
+         *
+         * @param overallSize  Size of the View (hiegh or width)
+         * @param paddingBegin Padding in the begin of the View (Top or Left)
+         * @param paddingEnd   Padding in the end of the View (Bottom or Right)
+         * @return Graph size
+         */
+        private float calcGraphSize(float overallSize, int paddingBegin, int paddingEnd) {
+            return overallSize - paddingBegin - paddingEnd;
+        }
+
+        /**
+         * Calculate Number given by the scale
+         *
+         * @param number Y coordinate in raw data
+         * @return Y coordinate given by the scale
+         */
+        private float getYPos(float number) {
+            return mHigh + mPaddingTop - (number - mMinimumY) * (mHigh / mMaximumDeltaY); // inverse + padding
+        }
+
+        /**
+         * Calculate Number given by the scale
+         *
+         * @param number X coordinate in raw data
+         * @return X coordinate given by the scale
+         */
+        private float getXPos(float number) {
+            return mPaddingLeft + (number - mMinimumX) * (mWidth / mMaximumDeltaX);
+        }
+
+        /**
+         * Calculate Max Value in list
+         *
+         * @param list LinkedList<Float> - data List
+         * @return max value
+         */
+        private float getMax(LinkedList<Float> list) {
+            return Collections.max(list);
+        }
+
+        /**
+         * Calculate Min Value in list
+         *
+         * @param list LinkedList<Float> - data List
+         * @return min value
+         */
+        private float getMin(LinkedList<Float> list) {
+            return Collections.min(list);
+        }
+
+
+        /**
+         * Path fill without interpolation.
+         * @param path Path to fill
+         */
+        private void linearPath(Path path) {
+            path.moveTo(mXCoordinatesList.getFirst(), mYCoordinatesList.getFirst());
+            Iterator<Float> iterX = mXCoordinatesList.iterator();
+            Iterator<Float> iterY = mYCoordinatesList.iterator();
+            while (iterX.hasNext() && iterY.hasNext()) {
+                path.lineTo(iterX.next(), iterY.next());
+            }
+        }
+
+        /**
+         * Lists for interpolation help points. Empty if interpolation is off.
+         */
+        private LinkedList<Float> interpolationXCoord = new LinkedList<>();
+        private LinkedList<Float> interpolationYCoord = new LinkedList<>();
+
+        private void clearInterpolatePoints() {
+            interpolationXCoord.clear();
+            interpolationYCoord.clear();
+        }
+
+        /**
+         * Path fill with interpolation help-points.
+         * @param path Path to fill
+         */
+        private void interpolatePath(Path path) {
+            path.moveTo(mXCoordinatesList.getFirst(), mYCoordinatesList.getFirst());
+            for (int i = 0; i < mXCoordinatesList.size() - 1; i++) {
+                path.cubicTo(mXCoordinatesList.get(i), mYCoordinatesList.get(i),
+                        interpolationXCoord.get(i), interpolationYCoord.get(i),
+                        mXCoordinatesList.get(i+1), mYCoordinatesList.get(i+1));
+            }
+        }
+
+        /**
+         * Интерполяция кривыми Безье с помощью дополнительных точек. Плохо работает для
+         * небольшого количества точек.
+         */
+        private void interpolate() {
+            clearInterpolatePoints();
+            float prevX = mXCoordinatesList.getFirst();
+            float prevY = mYCoordinatesList.getFirst();
+            float actualX = mXCoordinatesList.get(1);
+            float actualY = mYCoordinatesList.get(1);
+            float nextX = mXCoordinatesList.get(2);
+            float nextY = mYCoordinatesList.get(2);
+            float ACx = nextX - prevX;
+            float ACy = nextY - prevY;
+            float module = (float) Math.sqrt(ACx * ACx + ACy * ACy);
+            float tempX = actualX - ACx * (actualX - prevX) / (2f * module);
+            float tempY = actualY - ACy * (actualX - prevX) / (2f * module);
+            interpolationXCoord.add(tempX);
+            interpolationYCoord.add(tempY);
+            for (int i = 2; i < mXCoordinatesList.size(); i++) {
+                nextX = mXCoordinatesList.get(i);
+                nextY = mYCoordinatesList.get(i);
+                ACx = nextX - prevX;
+                ACy = nextY - prevY;
+                module = (float) Math.sqrt(ACx * ACx + ACy * ACy);
+                tempX = actualX + ACx * (actualX - prevX) / (2f * module);
+                tempY = actualY + ACy * (actualX - prevX) / (2f * module);
+                interpolationXCoord.add(tempX);
+                interpolationYCoord.add(tempY);
+                prevX = actualX;
+                prevY = actualY;
+                actualX = nextX;
+                actualY = nextY;
+            }
         }
     }
 }
