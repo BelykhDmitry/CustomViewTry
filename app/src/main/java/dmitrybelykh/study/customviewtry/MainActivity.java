@@ -1,22 +1,18 @@
 package dmitrybelykh.study.customviewtry;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Pair;
-import android.view.View;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.Switch;
 
 import java.util.ArrayList;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import dmitrybelykh.study.customviewtry.Utils.DataGenerator;
 
-public class MainActivity extends AppCompatActivity implements GraphSettingsFragment.OnGraphSettingsFragmentListener {
+public class MainActivity extends AppCompatActivity
+        implements GraphSettingsFragment.OnGraphSettingsFragmentListener {
 
     private DataGenerator dataGenerator;
     private GraphFragmentView graphFragmentView;
@@ -27,7 +23,6 @@ public class MainActivity extends AppCompatActivity implements GraphSettingsFrag
         setContentView(R.layout.activity_main);
 
         dataGenerator = new DataGenerator();
-
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         GraphFragment graphFragment;
@@ -46,8 +41,6 @@ public class MainActivity extends AppCompatActivity implements GraphSettingsFrag
         }
         graphFragmentView = graphFragment;
     }
-
-
 
     public void makeOtherGraph(int checkedId) {
         final ArrayList<Pair<Float, Float>> data;
@@ -69,12 +62,12 @@ public class MainActivity extends AppCompatActivity implements GraphSettingsFrag
     }
 
     public void changeColors(boolean switchOn) {
+        CardView cardView = findViewById(R.id.card_view);
         if (switchOn) {
-            findViewById(R.id.card_view).setBackgroundResource(0);
+            cardView.setCardBackgroundColor(android.R.color.white);
             graphFragmentView.setColor((getResources().getColor(R.color.colorPrimaryDark)));
-            findViewById(R.id.card_view).invalidate();
         } else {
-            findViewById(R.id.card_view).setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            cardView.setCardBackgroundColor(getColor(R.color.colorPrimaryDark));
             graphFragmentView.setColor(getResources().getColor(R.color.graphColor));
         }
     }

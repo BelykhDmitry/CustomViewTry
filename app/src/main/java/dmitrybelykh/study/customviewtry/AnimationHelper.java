@@ -8,7 +8,8 @@ import android.view.animation.AccelerateInterpolator;
 public class AnimationHelper {
     /**
      * Hides view with alpha
-     * @param view View to animate
+     *
+     * @param view      View to animate
      * @param endAction Can be null
      */
     public static void hideWithAnimation(View view, Runnable endAction) {
@@ -29,7 +30,8 @@ public class AnimationHelper {
 
     /**
      * Shows view with alpha
-     * @param view View to animate
+     *
+     * @param view      View to animate
      * @param endAction Can be null
      */
     public static void showWithAnimation(View view, Runnable endAction) {

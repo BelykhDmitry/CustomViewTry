@@ -3,9 +3,6 @@ package dmitrybelykh.study.customviewtry;
 
 import android.content.Context;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +10,8 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 
 import java.lang.ref.WeakReference;
+
+import androidx.fragment.app.Fragment;
 
 public class GraphSettingsFragment extends Fragment {
 
@@ -33,7 +32,9 @@ public class GraphSettingsFragment extends Fragment {
         switch1.setOnCheckedChangeListener((buttonView, isChecked) -> {changeColors(isChecked);});
 
         Switch interpolationSwitch = rootView.findViewById(R.id.interpolator_switch);
-        interpolationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {interpolatorSwitch(isChecked);});
+        interpolationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            interpolatorSwitch(isChecked);
+        });
 
         return rootView;
     }
@@ -72,7 +73,9 @@ public class GraphSettingsFragment extends Fragment {
 
     interface OnGraphSettingsFragmentListener {
         void onRadioGroupChange(int checkedId);
+
         void onInterpolationSwitch(boolean switchOn);
+
         void onThemeChangeToLight(boolean switchOn);
     }
 

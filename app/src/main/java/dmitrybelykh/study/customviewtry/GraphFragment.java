@@ -1,19 +1,15 @@
 package dmitrybelykh.study.customviewtry;
 
 
-import android.accessibilityservice.AccessibilityService;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Switch;
 
 import java.util.ArrayList;
+
+import androidx.fragment.app.Fragment;
 
 public class GraphFragment extends Fragment implements GraphFragmentView {
 

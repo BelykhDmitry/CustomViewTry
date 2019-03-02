@@ -6,19 +6,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
 
 import androidx.annotation.Nullable;
 
@@ -43,6 +40,11 @@ public class LinearGraph extends View {
         dataHelper = new DataHelper();
     }
 
+    /**
+     * Set new data to the Graph.
+     *
+     * @param dataList ArrayList of Pair<X, Y> where X, Y - float coordinates.
+     */
     public void setData(ArrayList<Pair<Float, Float>> dataList) {
         final LinearGraph self = this;
         AnimationHelper.hideWithAnimation(this, () -> {
@@ -54,12 +56,24 @@ public class LinearGraph extends View {
         });
     }
 
+    /**
+     * Set graph color.
+     *
+     * @param color Integer code of color.
+     */
     public void setGraphColor(int color) {
         this.mColor = color;
         setupPaint(mColor);
         invalidate();
     }
 
+    /**
+     * Set interpolation of graph.
+     *
+     * @param isInterpolationOn True to show graph with interpolation.
+     *                          Note, then graph must contain 3 and more points to interpolation.
+     *                          Otherwise, no interpolation will be displayed
+     */
     public void setInterpolationOn(boolean isInterpolationOn) {
         final LinearGraph self = this;
         dataHelper.interpolationOn = isInterpolationOn;
@@ -207,6 +221,7 @@ public class LinearGraph extends View {
 
         /**
          * Fill path with points.
+         *
          * @param path Path to fill
          */
         public void fillPath(Path path) {
@@ -298,6 +313,7 @@ public class LinearGraph extends View {
 
         /**
          * Path fill without interpolation.
+         *
          * @param path Path to fill
          */
         private void linearPath(Path path) {
@@ -322,6 +338,7 @@ public class LinearGraph extends View {
 
         /**
          * Path fill with interpolation help-points.
+         *
          * @param path Path to fill
          */
         private void interpolatePath(Path path) {
@@ -329,7 +346,7 @@ public class LinearGraph extends View {
             for (int i = 0; i < mXCoordinatesList.size() - 1; i++) {
                 path.cubicTo(mXCoordinatesList.get(i), mYCoordinatesList.get(i),
                         interpolationXCoord.get(i), interpolationYCoord.get(i),
-                        mXCoordinatesList.get(i+1), mYCoordinatesList.get(i+1));
+                        mXCoordinatesList.get(i + 1), mYCoordinatesList.get(i + 1));
             }
         }
 
